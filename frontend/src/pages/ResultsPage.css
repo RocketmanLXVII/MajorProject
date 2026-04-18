@@ -1,0 +1,572 @@
+/* ── Results Page Styles ── */
+
+.results-page {
+  min-height: 100vh;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  padding: 2rem;
+  font-family: var(--font);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  max-width: 700px;
+}
+
+.results-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.2rem;
+}
+
+.results-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+
+.error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  color: #f87171;
+  padding: 0.7rem 1.2rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  max-width: 700px;
+  width: 100%;
+}
+
+/* ── Video info bar ── */
+.video-info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+  max-width: 700px;
+}
+
+.info-chip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.chip-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 0.1rem;
+}
+
+.chip-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-analyzed { color: #34d399; }
+
+/* ── Analyze button ── */
+.btn-analyze {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-bottom: 1.5rem;
+}
+
+.btn-analyze:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(79, 140, 255, 0.3);
+}
+
+/* ── Analyzing spinner ── */
+.analyzing-card {
+  text-align: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(12px);
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(79, 140, 255, 0.2);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 0.75rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.analyzing-hint {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+/* ── Summary grid ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  max-width: 700px;
+  width: 100%;
+}
+
+.summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.summary-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  margin-bottom: 0.15rem;
+}
+
+.summary-value.mono {
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.75rem;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+/* ── No events ── */
+.no-events {
+  text-align: center;
+  padding: 2rem;
+  color: #34d399;
+}
+
+.no-events-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Event list ── */
+.event-list {
+  max-width: 700px;
+  width: 100%;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+/* ── Event card ── */
+.event-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.event-card:hover {
+  border-color: rgba(79, 140, 255, 0.2);
+}
+
+.event-card--expanded {
+  border-color: rgba(79, 140, 255, 0.3);
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.severity-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  color: #fff;
+  flex-shrink: 0;
+  min-width: 56px;
+  text-align: center;
+}
+
+.event-title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-class {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.event-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: 'Cascadia Code', monospace;
+}
+
+/* ── Confidence bar ── */
+.event-confidence {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.conf-bar-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.conf-bar-fill {
+  height: 100%;
+  background: var(--accent-gradient);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.conf-pct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  min-width: 32px;
+  text-align: right;
+}
+
+.expand-icon {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* ── Event detail ── */
+.event-detail {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.event-explanation {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0.75rem 0;
+}
+
+.event-meta-row {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: 'Cascadia Code', monospace;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Evidence gallery ── */
+.evidence-section {
+  margin-top: 0.75rem;
+}
+
+.evidence-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.evidence-gallery {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.evidence-thumb {
+  flex-shrink: 0;
+  width: 160px;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  transition: transform 0.15s, border-color 0.15s;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.evidence-thumb:hover {
+  transform: scale(1.04);
+  border-color: var(--accent-blue);
+}
+
+.evidence-thumb img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+.thumb-label {
+  display: block;
+  text-align: center;
+  font-size: 0.65rem;
+  padding: 0.3rem 0;
+  color: var(--text-secondary);
+}
+
+/* ── Lightbox ── */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.lightbox-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.lightbox-content img {
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Export Toolbar ── */
+.export-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 700px;
+  width: 100%;
+  margin-bottom: 1rem;
+  background: var(--bg-card);
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+}
+
+.export-toolbar h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.export-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.export-actions .btn {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-print {
+  background: var(--accent-gradient);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-print:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(79, 140, 255, 0.25);
+}
+
+/* ── Print Media Query ── */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Make dark elements light for printing */
+  .results-page {
+    background: #fff;
+    color: #000;
+    padding: 0;
+  }
+  
+  .results-header h1 {
+    -webkit-text-fill-color: #000;
+    color: #000;
+  }
+  
+  .summary-card {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    box-shadow: none;
+  }
+  
+  .summary-value {
+    color: #000;
+  }
+  
+  .event-card {
+    background: #fff;
+    border: 1px solid #aaa;
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  .event-card--expanded {
+    border-color: #aaa;
+  }
+
+  .severity-badge {
+    color: #000 !important;
+    border: 1px solid #333;
+    background: transparent !important;
+  }
+
+  .conf-bar-track {
+    background: #eee;
+  }
+
+  .conf-bar-fill {
+    background: #333;
+  }
+
+  .conf-pct {
+    color: #000;
+  }
+
+  .event-list {
+    max-width: 100%;
+  }
+  
+  .video-info-bar .info-chip {
+    background: transparent;
+    border: none;
+    padding: 0 0.5rem;
+  }
+
+  /* Force expanded content to show nicely */
+  .evidence-gallery {
+    overflow: visible;
+    flex-wrap: wrap;
+  }
+
+  .evidence-thumb {
+    border: 1px solid #ddd;
+  }
+
+  .expand-icon {
+    display: none;
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .export-toolbar { flex-direction: column; gap: 1rem; align-items: stretch; }
+  .export-actions { flex-wrap: wrap; justify-content: stretch; }
+  .export-actions .btn { flex: 1; justify-content: center; }
+  .event-confidence { width: 70px; }
+  .video-info-bar { gap: 0.4rem; }
+}

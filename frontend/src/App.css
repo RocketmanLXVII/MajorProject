@@ -1,0 +1,209 @@
+/* ── MulTiCheat — Phase 0 Landing Page ── */
+
+:root {
+  --bg-dark: #0a0a1a;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --accent-blue: #4f8cff;
+  --accent-purple: #a855f7;
+  --accent-gradient: linear-gradient(135deg, #4f8cff 0%, #a855f7 100%);
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --radius: 16px;
+  --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Animated glow background ── */
+.glow {
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(
+    circle,
+    rgba(79, 140, 255, 0.15) 0%,
+    rgba(168, 85, 247, 0.08) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  animation: glow-pulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+  0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+}
+
+/* ── Hero section ── */
+.hero {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+}
+
+.title {
+  font-size: 4.5rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.title-multi {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.title-cheat {
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-bottom: 2.5rem;
+}
+
+/* ── Status card ── */
+.status-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  backdrop-filter: blur(12px);
+  margin-bottom: 3rem;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.online {
+  background: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+.status-dot.offline {
+  background: #f87171;
+  box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
+}
+
+.status-dot.pulsing {
+  background: #fbbf24;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.status-details {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-left: 1.6rem;
+}
+
+.divider {
+  opacity: 0.4;
+}
+
+/* ── Feature cards ── */
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.25rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(79, 140, 255, 0.25);
+  box-shadow: 0 8px 32px rgba(79, 140, 255, 0.08);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.feature-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.feature-card p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.feature-card--link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .title { font-size: 3rem; }
+  .features { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,18 @@
+# MulTiCheat — Default Configuration
+app:
+  name: "MulTiCheat"
+  version: "0.1.0"
+  debug: false
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+
+storage:
+  upload_dir: "uploads"
+  evidence_dir: "evidence"
+  max_upload_size_mb: 500
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"

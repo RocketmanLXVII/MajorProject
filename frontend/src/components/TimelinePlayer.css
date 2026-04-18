@@ -1,0 +1,247 @@
+.timeline-player {
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Filters */
+.player-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.filter-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.filter-pill {
+  cursor: pointer;
+  padding: 0.35rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-pill:hover {
+  filter: brightness(1.2);
+}
+
+/* Video */
+.video-container {
+  position: relative;
+  width: 100%;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 360px;
+}
+
+.video-element {
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.fast-jump-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.3s;
+}
+
+.fast-jump-overlay.paused {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.big-play-btn {
+  background: var(--accent-gradient);
+  border: none;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 6px;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 10px 30px rgba(79, 140, 255, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.big-play-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 10px 40px rgba(79, 140, 255, 0.5);
+}
+
+/* Controls */
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  background: rgba(20, 20, 30, 0.95);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.control-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.time-display {
+  font-family: 'Cascadia Code', monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  min-width: 90px;
+}
+
+/* Timeline */
+.timeline-track-container {
+  flex: 1;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.timeline-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-track-container:hover .timeline-track {
+  height: 12px;
+}
+
+.timeline-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--accent-gradient);
+  pointer-events: none;
+}
+
+.timeline-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  min-width: 4px;
+  opacity: 0.8;
+  cursor: pointer;
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+.timeline-marker:hover {
+  opacity: 1;
+  filter: brightness(1.5);
+  z-index: 2;
+}
+
+.timeline-hover-tooltip {
+  position: absolute;
+  top: -30px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-family: 'Cascadia Code', monospace;
+  pointer-events: none;
+  white-space: nowrap;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Event List */
+.player-event-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  padding: 0.75rem 1.2rem;
+  overflow-x: auto;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.player-event-item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-left-width: 3px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 140px;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.player-event-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.event-item-time {
+  font-family: 'Cascadia Code', monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.2rem;
+}
+
+.event-item-class {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-right: 0.4rem;
+}
+
+.event-item-conf {
+  font-size: 0.75rem;
+  color: var(--accent-blue);
+}
