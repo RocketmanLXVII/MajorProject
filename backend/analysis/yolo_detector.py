@@ -35,7 +35,7 @@ class YOLODetector(BaseDetector):
         73: "book"
     }
 
-    def __init__(self, model_version: str = "yolov8n.pt", conf_threshold: float = 0.3):
+    def __init__(self, model_version: str = "yolov8m.pt", conf_threshold: float = 0.3):
         """
         Initialize the YOLO detector.
         
@@ -92,8 +92,8 @@ class YOLODetector(BaseDetector):
         if not self._available or self.model is None:
             return []
 
-        # Run inference specifying classes of interest using ByteTrack
-        results = self.model.track(frame, persist=True, tracker="bytetrack.yaml", verbose=False, conf=self.conf_threshold)
+        # Run inference specifying classes of interest using BoT-SORT at high-resolution
+        results = self.model.track(frame, persist=True, tracker="botsort.yaml", verbose=False, conf=self.conf_threshold, imgsz=1280)
         
         detections: list[Detection] = []
         for result in results:

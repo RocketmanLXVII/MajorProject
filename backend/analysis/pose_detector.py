@@ -29,7 +29,7 @@ class PoseDetector(BaseDetector):
     Evaluates COCO keypoints geometry to detect looking around and suspicious hand movements.
     """
 
-    def __init__(self, model_version: str = "yolov8n-pose.pt", conf_threshold: float = 0.5):
+    def __init__(self, model_version: str = "yolov8m-pose.pt", conf_threshold: float = 0.4):
         self.model_version_str = model_version
         self.conf_threshold = conf_threshold
         self.model: Any = None
@@ -73,7 +73,7 @@ class PoseDetector(BaseDetector):
         if not self._available or self.model is None:
             return []
 
-        results = self.model.track(frame, persist=True, tracker="bytetrack.yaml", verbose=False, conf=self.conf_threshold)
+        results = self.model.track(frame, persist=True, tracker="botsort.yaml", verbose=False, conf=self.conf_threshold, imgsz=1280)
         
         detections: list[Detection] = []
         for result in results:
@@ -126,12 +126,13 @@ class PoseDetector(BaseDetector):
                     if shoulder_width > 10:
                         offset_ratio = abs(nose_x - shoulder_center) / shoulder_width
                         if offset_ratio > 0.45:
+                            yaw_direction = "left" if nose_x < shoulder_center else "right"
                             detections.append(Detection(
                                 label="look_around",
                                 confidence=min(1.0, offset_ratio * 1.5),
                                 track_id=track_id,
                                 bbox=bbox,
-                                metadata={"offset_ratio": offset_ratio}
+                                metadata={"offset_ratio": offset_ratio, "yaw_direction": yaw_direction}
                             ))
                 
                 # SUSPICIOUS_HAND_MOVEMENT logic

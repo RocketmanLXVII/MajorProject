@@ -38,3 +38,9 @@ frontend/dist/
 .pytest_cache/
 htmlcov/
 .coverage
+
+# Models
+*.pt
+
+# Tools
+capture_screenshots.py

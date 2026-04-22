@@ -274,6 +274,42 @@ class AnalysisPipeline:
                          label="note_passing", confidence=0.8, track_id=pB.track_id, bbox=pB.bbox
                      ))
                      
+        # 3. Paper Copying Raycast Analysis
+        look_arounds = [d for d in detections if d.label == "look_around" and d.track_id is not None]
+        for la in look_arounds:
+            yaw = la.metadata.get("yaw_direction")
+            if not yaw or not la.bbox: continue
+            
+            ax, aw = la.bbox.x, la.bbox.w
+            acent = ax + aw / 2
+            
+            nearest_dist = float('inf')
+            target_person = None
+            
+            for pB in people:
+                if pB.track_id == la.track_id: continue
+                bx, bw = pB.bbox.x, pB.bbox.w
+                bcent = bx + bw / 2
+                
+                if yaw == "right" and bcent > acent:
+                    dist = bcent - acent
+                    if dist < nearest_dist:
+                        nearest_dist = dist
+                        target_person = pB
+                elif yaw == "left" and bcent < acent:
+                    dist = acent - bcent
+                    if dist < nearest_dist:
+                        nearest_dist = dist
+                        target_person = pB
+                        
+            if target_person and nearest_dist < (aw + target_person.bbox.w) * 2.5:
+                new_interactions.append(Detection(
+                    label="paper_copying",
+                    confidence=la.confidence * 0.9,
+                    track_id=la.track_id,
+                    bbox=la.bbox
+                ))
+                     
         detections.extend(new_interactions)
         return detections
 

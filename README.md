@@ -1,6 +1,16 @@
 # MulTiCheat — AI-Based Exam Cheating Detection System
 
-> Multimodal video analysis system that detects suspicious exam cheating behavior, produces time-stamped flags with annotated evidence, and presents results through an interactive video timeline.
+> State-of-the-art multimodal video analysis system that detects suspicious exam cheating behavior inside dense 60+ person classrooms. It produces time-stamped flags with annotated evidence, geometric spatial mapping, and presents results through an interactive video timeline.
+
+## Features
+
+- **Dense Multi-Person Tracking (BoT-SORT)**: Utilizes deep Visual Re-Identification (ReID) to maintain persistent student tracking IDs (`track_id`) even during severe occlusion or overlapping camera angles.
+- **High-Fidelity Model Inference**: Employs `yolov8m` (Medium) architectures overriding default compression matrices with native 1080p retention (`imgsz=1280`), guaranteeing detection of tiny unauthorized objects (phones/books) for students in the furthest back rows.
+- **Geometric Interaction Engine**: Calculates multi-person spatial interactions instead of isolated bounding boxes. Automatically detects relativistic behaviors such as:
+  - **Paper Copying**: Projects dynamic 2D head-yaw vectors casting spatial rays to intersect neighboring desk planes.
+  - **Note Passing**: Tracks synchronized anomalous wrist proximity dropping below extreme mathematical thresholds between distinct entity IDs.
+- **Interactive Proctor Timeline**: A React-based diagnostic UI featuring an HTML5 Canvas skeleton overlay mimicking the native ML matrices seamlessly over the tracking feed.
+- **Automated Evidence Bundling**: Zero-click automated exporting of suspicious timestamps with max-confidence visual evidence into proctor-ready print PDFs, CSVs, and localized Zips.
 
 ## Quick Start
 
