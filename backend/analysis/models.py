@@ -75,6 +75,9 @@ class FrameResult(BaseModel):
     )
 
 
+FrameAnalysisResult = FrameResult
+
+
 # ──────────────────────────────────────────────
 # Flag event (aggregated from multiple frames)
 # ──────────────────────────────────────────────

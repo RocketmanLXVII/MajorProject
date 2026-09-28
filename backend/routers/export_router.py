@@ -52,19 +52,23 @@ async def export_csv(video_id: str):
         "Frames Captured", "Explanation"
     ])
     
-    # Rows
-    for event in results.events:
+    if not results.events:
         writer.writerow([
-            event.event_id,
-            event.video_id,
-            event.predicted_class.value,
-            event.severity.value,
-            f"{event.confidence_score:.2f}",
-            f"{event.start_timestamp:.2f}",
-            f"{event.end_timestamp:.2f}",
-            event.end_frame - event.start_frame + 1,
-            event.explanation_text
+            "N/A", video_id, "normal", "low", "0.00", "0.00", "0.00", 0, "No malpractice events detected"
         ])
+    else:
+        for event in results.events:
+            writer.writerow([
+                event.event_id,
+                event.video_id,
+                event.predicted_class.value,
+                event.severity.value,
+                f"{event.confidence_score:.2f}",
+                f"{event.start_timestamp:.2f}",
+                f"{event.end_timestamp:.2f}",
+                event.end_frame - event.start_frame + 1,
+                event.explanation_text
+            ])
         
     csv_bytes = output.getvalue().encode('utf-8')
 
@@ -87,7 +91,7 @@ async def export_evidence_zip(video_id: str):
     ev_dir = vid_dir.parent.parent / "evidence" / video_id
 
     if not ev_dir.exists():
-        raise HTTPException(status_code=404, detail="Evidence directory not found.")
+        ev_dir.mkdir(parents=True, exist_ok=True)
         
     # Build ZIP in memory
     zip_buffer = io.BytesIO()

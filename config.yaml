@@ -1,18 +1,79 @@
-# MulTiCheat — Default Configuration
 app:
-  name: "MulTiCheat"
-  version: "0.1.0"
+  name: "MulTiCheat Pro"
+  version: "2.0.0"
   debug: false
 
 server:
   host: "0.0.0.0"
   port: 8000
+  workers: 4
+
+database:
+  url: "sqlite+aiosqlite:///multicheat_pro.db"
+  pool_size: 20
+  max_overflow: 10
 
 storage:
   upload_dir: "uploads"
   evidence_dir: "evidence"
-  max_upload_size_mb: 500
+  max_upload_size_mb: 2048
+  allowed_extensions: [".mp4", ".avi", ".mov", ".mkv", ".webm"]
 
-logging:
-  level: "INFO"
-  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+detection:
+  sample_fps: 5
+  person_confidence: 0.3
+  phone_confidence: 0.35
+  chit_confidence: 0.3
+
+  sahi:
+    person_slice_height: 640
+    person_slice_width: 640
+    person_overlap: 0.2
+    object_slice_height: 480
+    object_slice_width: 480
+    object_overlap: 0.25
+
+  tracking:
+    tracker: "botsort"
+    reid_model: "osnet_x0_25"
+    track_buffer: 30
+    match_threshold: 0.8
+
+  pose:
+    model: "rtmpose-m"
+    input_size: [256, 192]
+
+  head_pose:
+    face_mesh_confidence: 0.5
+    solve_pnp_iterations: 100
+
+  behavior_thresholds:
+    peeping_yaw_degrees: 35.0
+    peeping_duration_seconds: 2.0
+    peeping_max_distance_meters: 2.5
+    phone_use_duration_seconds: 1.5
+    note_passing_max_distance_meters: 0.3
+    note_passing_min_frames: 3
+    turning_around_yaw_degrees: 70.0
+    talking_duration_seconds: 3.0
+    talking_max_distance_meters: 1.5
+    suspicious_hand_duration_seconds: 3.0
+    leaving_seat_distance_meters: 1.0
+
+events:
+  severity_weights:
+    CRITICAL: 1.0
+    HIGH: 0.75
+    MEDIUM: 0.5
+    LOW: 0.25
+
+  min_confidence: 0.65
+  merge_gap_seconds: 3.0
+
+websocket:
+  update_interval_ms: 200
+  max_connections: 100
+
+export:
+  pdf_logo_path: "assets/logo.png"
+  csv_delimiter: ","

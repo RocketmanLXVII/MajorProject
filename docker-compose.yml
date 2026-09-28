@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: multicheat_postgres
+    environment:
+      POSTGRES_DB: multicheat
+      POSTGRES_USER: multicheat
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-multicheat_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: multicheat_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: multicheat_backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://multicheat:${DB_PASSWORD:-multicheat_pass}@postgres:5432/multicheat
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+    volumes:
+      - ./uploads:/app/uploads
+      - ./evidence:/app/evidence
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: multicheat_worker
+    command: celery -A backend.tasks.analysis_task worker --loglevel=info --concurrency=2
+    environment:
+      DATABASE_URL: postgresql+asyncpg://multicheat:${DB_PASSWORD:-multicheat_pass}@postgres:5432/multicheat
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+    volumes:
+      - ./uploads:/app/uploads
+      - ./evidence:/app/evidence
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    container_name: multicheat_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: multicheat_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:

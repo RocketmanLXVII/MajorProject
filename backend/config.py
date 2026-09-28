@@ -1,16 +1,17 @@
 """
-MulTiCheat — Application Configuration
+MulTiCheat — Configuration & Profile System
 
-Loads settings from environment variables (prefixed MULTICHEAT_) and config.yaml.
-Uses pydantic-settings for validation and type coercion.
+Supports profiles (FAST, BALANCED, ACCURACY, BENCHMARK) and loads settings from
+config.yaml / environment variables (MULTICHEAT_*).
 """
 
 from __future__ import annotations
 
 import logging
 import os
+from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, Optional
 
 import yaml
 from pydantic import Field, field_validator
@@ -18,41 +19,124 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger(__name__)
 
-# ──────────────────────────────────────────────
-# Resolve project root (parent of the backend/ package)
-# ──────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-def _load_yaml_config() -> dict[str, Any]:
-    """Load config.yaml from the project root. Returns empty dict on failure."""
+class ModelProfile(str, Enum):
+    FAST = "FAST"
+    BALANCED = "BALANCED"
+    ACCURACY = "ACCURACY"
+    BENCHMARK = "BENCHMARK"
+
+
+def load_yaml_config() -> dict[str, Any]:
     config_path = PROJECT_ROOT / "config.yaml"
     if not config_path.exists():
         logger.warning("config.yaml not found at %s — using defaults.", config_path)
         return {}
     try:
         with open(config_path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
-        logger.info("Loaded config.yaml from %s", config_path)
-        return data
+            return yaml.safe_load(f) or {}
     except Exception as exc:
         logger.error("Failed to parse config.yaml: %s", exc)
         return {}
 
 
-# Pre-load YAML so we can inject values as defaults
-_yaml = _load_yaml_config()
+_yaml = load_yaml_config()
+
+
+class PerceptionConfig:
+    """Configurable perception parameters."""
+
+    def __init__(
+        self,
+        profile: ModelProfile = ModelProfile.BALANCED,
+        detector_model: str = "yolov8n.pt",
+        pose_model: str = "yolov8m-pose.pt",
+        segmentation_model: str = "yolov8n-seg.pt",
+        full_frame_imgsz: int = 1280,
+        tile_imgsz: int = 1280,
+        tile_rows: int = 2,
+        tile_cols: int = 2,
+        tile_overlap: float = 0.20,
+        enable_tiling: bool = True,
+        enable_student_crops: bool = True,
+        crop_expand_ratio: float = 0.25,
+        crop_min_size: int = 224,
+        conf_threshold: float = 0.25,
+        nms_threshold: float = 0.45,
+    ):
+        self.profile = profile
+        self.detector_model = detector_model
+        self.pose_model = pose_model
+        self.segmentation_model = segmentation_model
+        self.full_frame_imgsz = full_frame_imgsz
+        self.tile_imgsz = tile_imgsz
+        self.tile_rows = tile_rows
+        self.tile_cols = tile_cols
+        self.tile_overlap = tile_overlap
+        self.enable_tiling = enable_tiling
+        self.enable_student_crops = enable_student_crops
+        self.crop_expand_ratio = crop_expand_ratio
+        self.crop_min_size = crop_min_size
+        self.conf_threshold = conf_threshold
+        self.nms_threshold = nms_threshold
+
+    @classmethod
+    def from_profile(cls, profile: ModelProfile) -> PerceptionConfig:
+        if profile == ModelProfile.FAST:
+            return cls(
+                profile=profile,
+                detector_model="yolov8n.pt",
+                pose_model="yolov8n-pose.pt",
+                full_frame_imgsz=640,
+                enable_tiling=False,
+                enable_student_crops=True,
+                conf_threshold=0.30,
+            )
+        elif profile == ModelProfile.ACCURACY:
+            return cls(
+                profile=profile,
+                detector_model="yolov8m.pt",
+                pose_model="yolov8m-pose.pt",
+                full_frame_imgsz=1280,
+                tile_rows=3,
+                tile_cols=3,
+                tile_overlap=0.25,
+                enable_tiling=True,
+                enable_student_crops=True,
+                conf_threshold=0.20,
+            )
+        elif profile == ModelProfile.BENCHMARK:
+            return cls(
+                profile=profile,
+                detector_model="yolov8m.pt",
+                pose_model="yolov8m-pose.pt",
+                full_frame_imgsz=1280,
+                tile_rows=3,
+                tile_cols=3,
+                tile_overlap=0.30,
+                enable_tiling=True,
+                enable_student_crops=True,
+                conf_threshold=0.15,
+            )
+        else:  # BALANCED
+            return cls(
+                profile=profile,
+                detector_model="yolov8n.pt",
+                pose_model="yolov8m-pose.pt",
+                full_frame_imgsz=1280,
+                tile_rows=2,
+                tile_cols=2,
+                tile_overlap=0.20,
+                enable_tiling=True,
+                enable_student_crops=True,
+                conf_threshold=0.25,
+            )
 
 
 class Settings(BaseSettings):
-    """Central application settings.
-
-    Priority (highest → lowest):
-      1. Environment variables  (MULTICHEAT_*)
-      2. .env file
-      3. config.yaml defaults
-      4. Field defaults below
-    """
+    """Central Application Settings."""
 
     model_config = SettingsConfigDict(
         env_prefix="MULTICHEAT_",
@@ -61,99 +145,70 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # ── App ────────────────────────────────────
-    app_name: str = Field(
-        default=_yaml.get("app", {}).get("name", "MulTiCheat"),
-        description="Application display name",
-    )
-    app_version: str = Field(
-        default=_yaml.get("app", {}).get("version", "0.1.0"),
-        description="Application version string",
-    )
-    debug: bool = Field(
-        default=_yaml.get("app", {}).get("debug", False),
-        description="Enable debug mode",
-    )
+    app_name: str = Field(default=_yaml.get("app", {}).get("name", "MulTiCheat"))
+    app_version: str = Field(default=_yaml.get("app", {}).get("version", "0.2.0"))
+    debug: bool = Field(default=_yaml.get("app", {}).get("debug", False))
 
-    # ── Server ─────────────────────────────────
-    host: str = Field(
-        default=_yaml.get("server", {}).get("host", "0.0.0.0"),
-        description="Server bind host",
-    )
-    port: int = Field(
-        default=_yaml.get("server", {}).get("port", 8000),
-        description="Server bind port",
-    )
+    host: str = Field(default=_yaml.get("server", {}).get("host", "0.0.0.0"))
+    port: int = Field(default=_yaml.get("server", {}).get("port", 8000))
 
-    # ── Storage ────────────────────────────────
-    upload_dir: str = Field(
-        default=_yaml.get("storage", {}).get("upload_dir", "uploads"),
-        description="Directory for uploaded videos",
-    )
-    evidence_dir: str = Field(
-        default=_yaml.get("storage", {}).get("evidence_dir", "evidence"),
-        description="Directory for evidence images",
-    )
-    max_upload_size_mb: int = Field(
-        default=_yaml.get("storage", {}).get("max_upload_size_mb", 500),
-        description="Maximum upload file size in MB",
-    )
+    upload_dir: str = Field(default=_yaml.get("storage", {}).get("upload_dir", "uploads"))
+    evidence_dir: str = Field(default=_yaml.get("storage", {}).get("evidence_dir", "evidence"))
+    db_path: str = Field(default=_yaml.get("storage", {}).get("db_path", "multicheat.db"))
+    max_upload_size_mb: int = Field(default=_yaml.get("storage", {}).get("max_upload_size_mb", 500))
 
-    # ── Logging ────────────────────────────────
-    log_level: str = Field(
-        default=_yaml.get("logging", {}).get("level", "INFO"),
-        description="Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
-    )
+    active_profile: ModelProfile = Field(default=ModelProfile.BALANCED)
+    log_level: str = Field(default=_yaml.get("logging", {}).get("level", "INFO"))
     log_format: str = Field(
-        default=_yaml.get("logging", {}).get(
-            "format", "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-        ),
-        description="Logging format string",
+        default=_yaml.get(
+            "logging",
+            {},
+        ).get("format", "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s")
     )
 
-    # ── Validators ─────────────────────────────
     @field_validator("log_level")
     @classmethod
-    def _validate_log_level(cls, v: str) -> str:
-        allowed = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
-        v_upper = v.upper()
-        if v_upper not in allowed:
-            raise ValueError(f"log_level must be one of {allowed}, got '{v}'")
-        return v_upper
+    def validate_log_level(cls, v: str) -> str:
+        valid = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+        if v.upper() not in valid:
+            raise ValueError(f"Invalid log_level '{v}'. Must be one of {valid}")
+        return v.upper()
 
     @field_validator("max_upload_size_mb")
     @classmethod
-    def _validate_max_upload_size(cls, v: int) -> int:
+    def validate_max_upload_size(cls, v: int) -> int:
         if v <= 0:
             raise ValueError("max_upload_size_mb must be > 0")
         return v
 
-    # ── Helpers ────────────────────────────────
     @property
     def upload_path(self) -> Path:
-        """Resolved absolute path for uploads directory."""
         p = Path(self.upload_dir)
-        if not p.is_absolute():
-            p = PROJECT_ROOT / p
-        return p
+        return p if p.is_absolute() else PROJECT_ROOT / p
 
     @property
     def evidence_path(self) -> Path:
-        """Resolved absolute path for evidence directory."""
         p = Path(self.evidence_dir)
-        if not p.is_absolute():
-            p = PROJECT_ROOT / p
-        return p
+        return p if p.is_absolute() else PROJECT_ROOT / p
+
+    @property
+    def db_file_path(self) -> Path:
+        p = Path(self.db_path)
+        return p if p.is_absolute() else PROJECT_ROOT / p
+
+    @property
+    def db_url(self) -> str:
+        env_url = os.getenv("DATABASE_URL")
+        if env_url:
+            return env_url
+        return f"sqlite+aiosqlite:///{self.db_file_path}"
 
     def ensure_directories(self) -> None:
-        """Create upload and evidence directories if they don't exist."""
         self.upload_path.mkdir(parents=True, exist_ok=True)
         self.evidence_path.mkdir(parents=True, exist_ok=True)
-        logger.info("Ensured directories: %s, %s", self.upload_path, self.evidence_path)
 
 
 def get_settings() -> Settings:
-    """Factory that returns a cached Settings singleton."""
     if not hasattr(get_settings, "_instance"):
-        get_settings._instance = Settings()  # type: ignore[attr-defined]
-    return get_settings._instance  # type: ignore[attr-defined]
+        get_settings._instance = Settings()  # type: ignore
+    return get_settings._instance  # type: ignore

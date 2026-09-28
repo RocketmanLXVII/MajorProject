@@ -2,10 +2,11 @@
 MulTiCheat — FastAPI Application Entry Point
 
 Provides:
-- CORS middleware
-- Lifespan handler for startup/shutdown tasks
+- CORS middleware with configurable origins
+- Lifespan handler for startup/shutdown tasks & database init
 - /health endpoint
 - Structured logging configuration
+- Job, Analysis, Video, Export, Student & WebSockets endpoints
 """
 
 from __future__ import annotations
@@ -21,17 +22,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.config import Settings, get_settings
+from backend.database import init_db
 
-# ──────────────────────────────────────────────
-# Logging setup
-# ──────────────────────────────────────────────
 
 def configure_logging(settings: Settings) -> None:
-    """Configure root logger with the format and level from settings."""
     root_logger = logging.getLogger()
     root_logger.setLevel(settings.log_level)
 
-    # Avoid duplicate handlers on reload
     if not root_logger.handlers:
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(settings.log_level)
@@ -42,73 +39,58 @@ def configure_logging(settings: Settings) -> None:
 
 logger = logging.getLogger(__name__)
 
-# ──────────────────────────────────────────────
-# Lifespan (startup / shutdown)
-# ──────────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Application lifespan handler."""
     settings = get_settings()
     configure_logging(settings)
 
     logger.info("=" * 60)
     logger.info("  %s v%s starting up", settings.app_name, settings.app_version)
     logger.info("  Debug mode: %s", settings.debug)
-    logger.info("  Log level : %s", settings.log_level)
+    logger.info("  Profile   : %s", settings.active_profile.value)
     logger.info("=" * 60)
 
-    # Ensure runtime directories exist
     settings.ensure_directories()
-    logger.info("Upload dir  : %s", settings.upload_path)
-    logger.info("Evidence dir: %s", settings.evidence_path)
+    init_db()
 
-    yield  # ── app is running ──
+    yield
 
     logger.info("%s shutting down.", settings.app_name)
 
 
-# ──────────────────────────────────────────────
-# FastAPI application
-# ──────────────────────────────────────────────
-
 def create_app() -> FastAPI:
-    """Application factory."""
     settings = get_settings()
 
     app = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
-        description="AI-based exam cheating detection system",
+        description="Production AI-based exam cheating detection system",
         lifespan=lifespan,
     )
 
-    # ── CORS ───────────────────────────────────
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Tighten in production
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
 
-    # ── Health endpoint ────────────────────────
     @app.get("/health", tags=["system"])
     async def health_check() -> JSONResponse:
-        """Return basic health information."""
         return JSONResponse(
             content={
                 "status": "ok",
                 "app_name": settings.app_name,
                 "version": settings.app_version,
+                "profile": settings.active_profile.value,
                 "timestamp": time.time(),
             }
         )
 
-    # ── Root redirect / info ───────────────────
     @app.get("/", tags=["system"])
     async def root() -> JSONResponse:
-        """Root endpoint with basic API info."""
         return JSONResponse(
             content={
                 "message": f"Welcome to {settings.app_name}",
@@ -117,17 +99,19 @@ def create_app() -> FastAPI:
             }
         )
 
-    # ── Routers ─────────────────────────────────
     from backend.routers.video_router import router as video_router
     from backend.routers.analysis_router import router as analysis_router
     from backend.routers.export_router import router as export_router
-    
+    from backend.routers.student_router import student_router
+    from backend.routers.ws_router import ws_router
+
     app.include_router(video_router)
     app.include_router(analysis_router)
     app.include_router(export_router)
+    app.include_router(student_router)
+    app.include_router(ws_router)
 
     return app
 
 
-# Module-level app instance used by uvicorn
 app = create_app()

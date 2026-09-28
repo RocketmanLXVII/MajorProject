@@ -26,7 +26,7 @@ async def test_health_endpoint_returns_ok(client):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
-    assert data["app_name"] == "MulTiCheat"
+    assert "MulTiCheat" in data["app_name"]
     assert "version" in data
     assert "timestamp" in data
 
@@ -50,7 +50,7 @@ def test_config_loads_with_defaults():
     from backend.config import Settings
 
     settings = Settings()
-    assert settings.app_name == "MulTiCheat"
+    assert "MulTiCheat" in settings.app_name
     assert settings.port == 8000
     assert settings.log_level in {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
     assert settings.max_upload_size_mb > 0

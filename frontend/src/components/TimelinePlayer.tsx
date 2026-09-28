@@ -51,7 +51,7 @@ export default function TimelinePlayer({ videoId, duration, events }: TimelinePl
   const [hoverPosition, setHoverPosition] = useState<number>(0)
   
   // Wireframes
-  const [showWireframes, setShowWireframes] = useState(false)
+  const [showWireframes, setShowWireframes] = useState(true)
   const [annotations, setAnnotations] = useState<FrameAnnotation[]>([])
   const canvasRef = useRef<HTMLCanvasElement>(null)
   
@@ -133,13 +133,15 @@ export default function TimelinePlayer({ videoId, duration, events }: TimelinePl
           frame.detections.forEach(det => {
             // Draw boxes
             if (det.bbox) {
-              ctx.strokeStyle = det.label === 'cell phone' ? '#ef4444' : '#f97316'
+              const labelName = det.label.toLowerCase()
+              ctx.strokeStyle = labelName === 'person' ? '#34d399' : (labelName.includes('phone') ? '#ef4444' : '#f59e0b')
               ctx.lineWidth = 2
               ctx.strokeRect(det.bbox.x * scaleX, det.bbox.y * scaleY, det.bbox.w * scaleX, det.bbox.h * scaleY)
               
               ctx.fillStyle = ctx.strokeStyle
-              ctx.font = '12px Inter'
-              ctx.fillText(`${det.label} ${(det.confidence * 100).toFixed(0)}%`, det.bbox.x * scaleX, (det.bbox.y * scaleY) - 5)
+              ctx.font = '600 12px Inter, sans-serif'
+              const labelText = det.metadata?.track_label ? `${det.metadata.track_label}` : `${det.label} ${(det.confidence * 100).toFixed(0)}%`
+              ctx.fillText(labelText, det.bbox.x * scaleX + 4, Math.max(14, (det.bbox.y * scaleY) - 5))
             }
             
             // Draw skeleton
@@ -170,6 +172,56 @@ export default function TimelinePlayer({ videoId, duration, events }: TimelinePl
                   ctx.fill()
                 }
               })
+            }
+
+            // Draw 3D Gaze Ray Line
+            if (det.metadata?.landmarks?.['0'] && det.bbox) {
+              const nose = det.metadata.landmarks['0']
+              if (nose.confidence > 0.3) {
+                const headX = nose.x * scaleX
+                const headY = nose.y * scaleY
+
+                const yaw = det.metadata.yaw || 0.0
+                const pitch = det.metadata.pitch || 0.0
+
+                const yawRad = (yaw * Math.PI) / 180
+                const pitchRad = (pitch * Math.PI) / 180
+                const rayLen = 45.0
+
+                const endX = headX + Math.sin(yawRad) * Math.cos(pitchRad) * rayLen
+                const endY = headY + Math.sin(pitchRad) * rayLen + 15.0
+
+                const events = det.metadata.malpractice_events || []
+                let gazeColor = '#38bdf8' // cyan default
+                if (events.length > 0) gazeColor = '#ef4444' // red if malpractice
+                else if (Math.abs(yaw) > 18.0) gazeColor = '#f59e0b' // amber if peeking
+
+                ctx.strokeStyle = gazeColor
+                ctx.lineWidth = 2.5
+                ctx.beginPath()
+                ctx.moveTo(headX, headY)
+                ctx.lineTo(endX, endY)
+                ctx.stroke()
+
+                ctx.fillStyle = gazeColor
+                ctx.beginPath()
+                ctx.arc(endX, endY, 4, 0, Math.PI * 2)
+                ctx.fill()
+              }
+            }
+
+            // Draw Active Malpractice Badges
+            if (det.metadata?.malpractice_events?.length > 0 && det.bbox) {
+              const eventsStr = det.metadata.malpractice_events.join(' | ').replace(/_/g, ' ')
+              ctx.fillStyle = '#ef4444'
+              ctx.font = 'bold 11px Inter, sans-serif'
+              const badgeY = Math.max(28, det.bbox.y * scaleY - 18)
+              const txtWidth = ctx.measureText(eventsStr).width
+              
+              ctx.fillStyle = 'rgba(239, 68, 68, 0.9)'
+              ctx.fillRect(det.bbox.x * scaleX, badgeY - 14, txtWidth + 12, 18)
+              ctx.fillStyle = '#ffffff'
+              ctx.fillText(eventsStr, det.bbox.x * scaleX + 6, badgeY - 1)
             }
           })
         }
